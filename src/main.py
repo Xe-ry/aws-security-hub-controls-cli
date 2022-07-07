@@ -285,9 +285,14 @@ def get_controls_online(client):
         if standard_name not in controls_online:
             # initialize new standard
             controls_online[standard_name] = dict()
-        controls_online[standard_name] = client.describe_standards_controls(
+        paginator = client.get_paginator('describe_standards_controls')
+        response_iterator = paginator.paginate(
             StandardsSubscriptionArn=standard["StandardsSubscriptionArn"]
         )
+        controls = []
+        for page in response_iterator:
+            controls.extend(page["Controls"])
+        controls_online[standard_name]["Controls"] = controls
 
     logger.debug("controls_online = %s", str(controls_online))
     logger.debug("Leave get_controls_online")
